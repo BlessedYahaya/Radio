@@ -1,0 +1,20 @@
+node_modules/**/*
+.expo/*
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+web-report/
+
+# macOS
+.DS_Store
+
+ <WebView
+        originWhitelist={['*']}
+        source={{html: '<iframe src="https://www.radioking.com/widgets/player/player.php?id=290620&c=%23ffffff&c2=%23d35400&ii=&p=1&pp=1&i=0&eq=1&po=1&t=1&f=v&v=2&s=0&li=1&h=100&l=100&a=0&plc=0&popup=0&fullsize" name="idFrame" id="idFrame" style="border-radius: 5px; width:100%;height:100%; min-height: 365px;" frameBorder="0"></iframe>'}}
+        style={{ marginTop: 20, marginLeft:20,  }} 
+      />
