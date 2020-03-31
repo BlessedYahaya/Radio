@@ -11,6 +11,9 @@ const screenHeight = Math.round(Dimensions.get('window').height);
 let timer
 
 export default class Player extends Component{
+        
+        
+
         constructor(props){
             super(props);
     
@@ -27,6 +30,7 @@ export default class Player extends Component{
           };
     
         }
+
 
       async _playRecording() {
           if(Platform.OS === 'android'){
@@ -53,7 +57,10 @@ export default class Player extends Component{
                 
               });
           } else{
-          
+              this.setState({
+                 message:"Radio Buffering...Please wait",
+                  visible:true,   
+              })
             const { sound } = await Audio.Sound.createAsync(
                 {uri:'https://www.radioking.com/play/worldbeat'},
                 {
@@ -109,6 +116,8 @@ export default class Player extends Component{
                       this.setState({
                         playingStatus: 'donepause',
                         setIcon:require("../assets/play.png"),
+                        message:"Radio Paused",
+                        visible: true,
                       });
                     } else {
                       console.log('playing...');
@@ -117,7 +126,7 @@ export default class Player extends Component{
                       this.setState({
                         playingStatus: 'playing',
                         setIcon:require("../assets/pause.png"),
-                    
+                        visible: false,
                       });
                     }
                   }
@@ -142,7 +151,7 @@ export default class Player extends Component{
                       this.setState({
                         playingStatus: 'playing',
                         setIcon:require("../assets/pause.png"),
-                     
+                        visible: false,
                       });
                     }
                   }
@@ -197,7 +206,7 @@ export default class Player extends Component{
 
       _muteSound = () => {
 
-       
+        if(this.sound.setVolumeAsync !== undefined){
             if (Platform.OS === 'ios'){
                 if(this.state.playingStatus === "playing" && this.state.isMuted === false){
                     this.setState({
@@ -234,7 +243,9 @@ export default class Player extends Component{
     
               }
               
-        
+        }else{
+            console.log('Time out!!!')
+        }
           
          
 
@@ -302,6 +313,12 @@ export default class Player extends Component{
 
     async componentDidMount(){
 
+        // await Font.loadAsync({
+        //     'khand-bold': require('../assets/fonts/khand-semibold.ttf'),
+        //     'khand-light': require('../assets/fonts/khand-light.ttf'),
+        //     'khand-regular': require('../assets/fonts/khand-regular.ttf'),
+        //   }, this.setState({fontLoaded:true}));
+
         let timer = await this.getMusicFromApiAsync()
         setInterval(() => timer = this.getMusicFromApiAsync(), timer)   
     }
@@ -311,9 +328,9 @@ export default class Player extends Component{
 
         return (
 
-            <ImageBackground style={styles.mainContainer} source={this.state.track.cover === null || undefined ? this.state.defaultBackgroundImaage : {uri:this.state.track.cover}}>
+            <View style={styles.mainContainer}>
       
-            <View style={styles.redCover}  >
+            <Image style={styles.image} source={this.state.track.cover === null || undefined ? this.state.defaultBackgroundImaage : {uri:this.state.track.cover}} />
                 <View>
                     <View style={styles.imageContainer}>
                         <Image style={styles.logoIcon} source={require('../assets/icon.png')}/>
@@ -323,43 +340,44 @@ export default class Player extends Component{
 
                     <View style={styles.textContainer}> 
 
-                                <Text style={{textAlign:'center',  color:'#DD0E34',fontSize:15, fontWeight: "bold"}}>Now Playing</Text>
-                                <Text style={{textAlign:'center',  fontWeight: "bold", color:'white',   fontSize:20, paddingTop:20}}>{this.state.track.title}</Text>
-                                <Text style={{textAlign:'center', fontWeight: "bold",  fontSize:15, color:'white', paddingTop:2, }}>{this.state.track.artist}</Text>
+                                <Text style={{textAlign:'center',  color:'red',fontSize:15, fontWeight: "bold"}}>Now Playing</Text>
+                                <Text style={{textAlign:'center',  fontWeight: "bold",   fontSize:35, paddingTop:20}}>{this.state.track.title}</Text>
+                                <Text style={{textAlign:'center', fontWeight: "bold",  fontSize:15, paddingTop:2, }}>{this.state.track.artist}</Text>
                     </View>
                     
-                   
+                    <Toast
+                        visible={this.state.visible}
+                        position={50}
+                        onHidden={()=>{
+                        // onHidden
+                        }}>{this.state.message}
+                    </Toast>
               
                     <View style={styles.container}>
                         
-                        <TouchableOpacity style={styles.volumeIconTouch} onPress={
-                                () => {
-                                    if(this.sound !== undefined){
-                                        this._muteSound()
-                                    }else{
-                                        null
-                                    }
-                                } 
-                                
-                                } >
-                                <Image style={styles.volumeIcon} source={this.state.setMuteIcon}/>
-                            </TouchableOpacity>
-                    
-
-                            <TouchableOpacity style={styles.play_pauseIconTouch} onPress={this._playAndPause}>
-                                <Image style={styles.play_pauseIcon}  source={this.state.setIcon}/>
-                            </TouchableOpacity>
-
-
+                        <TouchableOpacity style={styles.tinyIconTouch} onPress={
+                            () => {
+                                if(this.sound !== undefined || null){
+                                    this._muteSound
+                                }else{
+                                    null
+                                }
+                            }
                             
+                            } >
+                            <Image style={styles.volumeIcon} source={this.state.setMuteIcon}/>
+                        </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.powerIconTouch} onPress={this._powerDown} >
-                                <Image style={styles.powerIcon} source={require('../assets/power.png')}  />
-                            </TouchableOpacity>
-                        </View>
+                        <TouchableOpacity style={styles.smallIcon} onPress={this._playAndPause}>
+                            <Image style={styles.smallIcon}  source={this.state.setIcon}/>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.tinyIconTouch} onPress={this._powerDown} >
+                            <Image style={styles.powerIcon} source={require('../assets/power.png')}  />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-                </View>
-            </ImageBackground>
+            </View>
       
         )
     }
@@ -368,17 +386,11 @@ export default class Player extends Component{
 
 const styles = StyleSheet.create({
     container:{
-        resizeMode: "cover",
         flexDirection:'row', 
         justifyContent: 'center',
         marginTop:Platform.OS === 'ios' ? hp('55%') : hp('48%'),
-        height:Platform.OS === 'ios' ? hp('80%') : hp('77%'),
         
 
-    },
-    redCover:{
-        backgroundColor:'rgba(147,7,33,0.5)', 
-        height:Platform.OS === 'ios' ? hp('80%') : hp('77%'),
     },
     textContainer:{
         position:'absolute',
@@ -412,39 +424,25 @@ const styles = StyleSheet.create({
   volumeIcon: {
     width: 25,
     height: 25,
-    // marginRight: 20,
+    marginRight: 20,
     marginTop:22,
-    
+    opacity:0.9,
   },
-  volumeIconTouch:{
-    width: 50,
-    height: 50,
-    // marginRight: 10,
-  },
-
- powerIcon: {
+  powerIcon: {
     width: 25,
     height: 25,
-    // marginLeft: 10,
+    marginLeft: 10,
     marginTop:22,
   },
-  powerIconTouch:{
+  smallIcon: {
+    width: 70,
+    height: 70,
+    marginRight: 20,
+  },
+  tinyIconTouch:{
     width: 50,
     height: 50,
-    // marginRight: 10,
-  },
-  play_pauseIcon: {
-    width: 70,
-    height: 70,
-   
-    marginRight: 25,
-  },
-  play_pauseIconTouch:{
-    width: 70,
-    height: 70,
-
-    
-    marginRight: 25,
+    marginRight: 10,
   },
   logoIcon:{
     width:70,

@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, Dimensions , ToastAndroid, Platform, BackHandler, Alert} from 'react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Audio } from 'expo-av';
-import * as Font from 'expo-font';
 import Toast from 'react-native-tiny-toast'
 
 
@@ -11,6 +10,9 @@ const screenHeight = Math.round(Dimensions.get('window').height);
 let timer
 
 export default class Player extends Component{
+        
+        
+
         constructor(props){
             super(props);
     
@@ -21,13 +23,18 @@ export default class Player extends Component{
             isMuted: false,
             visible:false,
             message:"Radio Buffering...Please wait",
-            defaultBackgroundImaage: require('../assets/player.png'),
+           
             track: {}
 
           };
     
+    
+    
         }
 
+
+        
+      
       async _playRecording() {
           if(Platform.OS === 'android'){
             ToastAndroid.show('Radio Buffering. Please wait....', ToastAndroid.LONG); 
@@ -53,7 +60,10 @@ export default class Player extends Component{
                 
               });
           } else{
-          
+              this.setState({
+                 message:"Radio Buffering...Please wait",
+                  visible:true,   
+              })
             const { sound } = await Audio.Sound.createAsync(
                 {uri:'https://www.radioking.com/play/worldbeat'},
                 {
@@ -99,16 +109,22 @@ export default class Player extends Component{
                     
                     }
                 }
+
+
       };
       
       async _pauseAndPlayRecording() {
-            if(Platform.OS === 'ios'){
+
+
+            if(Platform === 'ios'){
                 if (this.sound != null) {
                     if (this.state.playingStatus == 'playing') {
                       await this.sound.pauseAsync();
                       this.setState({
                         playingStatus: 'donepause',
                         setIcon:require("../assets/play.png"),
+                        message:"Radio Paused",
+                        visible: true,
                       });
                     } else {
                       console.log('playing...');
@@ -117,7 +133,7 @@ export default class Player extends Component{
                       this.setState({
                         playingStatus: 'playing',
                         setIcon:require("../assets/pause.png"),
-                    
+                        visible: false,
                       });
                     }
                   }
@@ -131,18 +147,21 @@ export default class Player extends Component{
                     if (this.state.playingStatus == 'playing') {
                       console.log('pausing...');
                       await this.sound.pauseAsync();
-                      ToastAndroid.show('Radio Paused', ToastAndroid.SHORT); 
+                      ToastAndroid.show('Radio Paused', ToastAndroid.LONG); 
                       this.setState({
                         playingStatus: 'donepause',
                         setIcon:require("../assets/play.png"),
+                        
                       });
                     } else {
                       console.log('playing...');
                       await this.sound.playAsync();
+                      ToastAndroid.show('Radio Paused', ToastAndroid.LONG); 
+                      console.log('playing!');
                       this.setState({
                         playingStatus: 'playing',
                         setIcon:require("../assets/pause.png"),
-                     
+                        visible: false,
                       });
                     }
                   }
@@ -197,49 +216,53 @@ export default class Player extends Component{
 
       _muteSound = () => {
 
-       
-            if (Platform.OS === 'ios'){
-                if(this.state.playingStatus === "playing" && this.state.isMuted === false){
-                    this.setState({
-                        isMuted: true,
-                        setMuteIcon:require("../assets/Unmute.png"),
-                    }, () => this.sound.setVolumeAsync(0))  
-                  }else{
-                    this.sound.setVolumeAsync(1)
-                    this.setState({
-                        isMuted: false,
-                        setMuteIcon:require("../assets/Mute.png"),   
-                    })  
-                }
-              }  else
-              {
-    
-                if(this.state.playingStatus === "playing" && this.state.isMuted === false){
-                    ToastAndroid.show('Radio Muted', ToastAndroid.SHORT);
-                    this.sound.setVolumeAsync(0)
-                    this.setState({
-                        isMuted: true,
-                        setMuteIcon:require("../assets/Unmute.png")
-                    })
-                      
-                  }else{
-                    this.sound.setVolumeAsync(1)
-                    ToastAndroid.show('Radio Unmuted', ToastAndroid.SHORT);
-                    this.setState({
-                        isMuted: false,
-                        setMuteIcon:require("../assets/Mute.png")
-                    })
-                   
-                  }
-    
+          if (Platform.OS === 'ios'){
+            if(this.state.playingStatus === "playing" && this.state.isMuted === false){
+                this.setState({
+                    isMuted: true,
+                    setMuteIcon:require("../assets/Unmute.png"),
+                    
+                    
+
+                }, () => this.sound.setVolumeAsync(0))
+                
+               
+               
+                  
+              }else{
+                this.sound.setVolumeAsync(1)
+                this.setState({
+                    isMuted: false,
+                    setMuteIcon:require("../assets/Mute.png"),
+                    
+                    
+                })
+               
               }
-              
-        
+
+          }
+          else
+          {
+            if(this.state.playingStatus === "playing" && this.state.isMuted === false){
+                ToastAndroid.show('Radio Muted', ToastAndroid.SHORT);
+                this.sound.setVolumeAsync(0)
+                this.setState({
+                    isMuted: true,
+                    setMuteIcon:require("../assets/Unmute.png")
+                })
+                  
+              }else{
+                this.sound.setVolumeAsync(1)
+                ToastAndroid.show('Radio Unmuted', ToastAndroid.SHORT);
+                this.setState({
+                    isMuted: false,
+                    setMuteIcon:require("../assets/Mute.png")
+                })
+               
+              }
+
+          }
           
-         
-
-
-        
           
       }
 
@@ -282,7 +305,10 @@ export default class Player extends Component{
           }
       }
 
-    async componentWillMount(){ 
+    componentWillMount(){
+
+       
+        
 
         Audio.setAudioModeAsync({
             allowsRecordingIOS: false,
@@ -295,26 +321,25 @@ export default class Player extends Component{
             playThroughEarpieceAndroid: false
           });
           
-          
 
          
     }
 
     async componentDidMount(){
-
         let timer = await this.getMusicFromApiAsync()
-        setInterval(() => timer = this.getMusicFromApiAsync(), timer)   
+
+        setInterval(() => timer = this.getMusicFromApiAsync(), timer)
+
+        
     }
 
 
     render(){
 
         return (
-
-            <ImageBackground style={styles.mainContainer} source={this.state.track.cover === null || undefined ? this.state.defaultBackgroundImaage : {uri:this.state.track.cover}}>
       
-            <View style={styles.redCover}  >
-                <View>
+            <ImageBackground style={styles.image} source={{uri:this.state.track.cover}}>
+                <View style={styles.redCover}>
                     <View style={styles.imageContainer}>
                         <Image style={styles.logoIcon} source={require('../assets/icon.png')}/>
 
@@ -322,20 +347,30 @@ export default class Player extends Component{
                     
 
                     <View style={styles.textContainer}> 
-
-                                <Text style={{textAlign:'center',  color:'#DD0E34',fontSize:15, fontWeight: "bold"}}>Now Playing</Text>
-                                <Text style={{textAlign:'center',  fontWeight: "bold", color:'white',   fontSize:20, paddingTop:20}}>{this.state.track.title}</Text>
-                                <Text style={{textAlign:'center', fontWeight: "bold",  fontSize:15, color:'white', paddingTop:2, }}>{this.state.track.artist}</Text>
+                            
+                            <Text style={{textAlign:'center',  color:'black', fontWeight: "bold"}}>Now Playing</Text>
+                            <Text style={{textAlign:'center', color:'white', fontWeight: "bold", fontSize:20, paddingTop:20}}>{this.state.track.title}</Text>
+                            <Text style={{textAlign:'center', fontWeight: "bold", fontSize:10, paddingTop:2, color:'white'}}>{this.state.track.artist}</Text>
                     </View>
+
                     
-                   
-              
+                    <Toast
+                        visible={this.state.visible}
+                        position={50}
+                        onHidden={()=>{
+                        // onHidden
+                        }}>{this.state.message}
+                    </Toast>
+                    
+
+
+                        
                     <View style={styles.container}>
                         
                         <TouchableOpacity style={styles.volumeIconTouch} onPress={
                                 () => {
                                     if(this.sound !== undefined){
-                                        this._muteSound()
+                                        this._muteSound
                                     }else{
                                         null
                                     }
@@ -358,22 +393,24 @@ export default class Player extends Component{
                             </TouchableOpacity>
                         </View>
                 </View>
-                </View>
+                
+                
             </ImageBackground>
       
         )
     }
-}
+        
+    
 
+}
 
 const styles = StyleSheet.create({
     container:{
-        resizeMode: "cover",
         flexDirection:'row', 
         justifyContent: 'center',
-        marginTop:Platform.OS === 'ios' ? hp('55%') : hp('48%'),
-        height:Platform.OS === 'ios' ? hp('80%') : hp('77%'),
-        
+        marginTop:hp('55%'),
+        borderColor:'yellow',
+        borderWidth:2,
 
     },
     redCover:{
@@ -381,33 +418,21 @@ const styles = StyleSheet.create({
         height:Platform.OS === 'ios' ? hp('80%') : hp('77%'),
     },
     textContainer:{
+
         position:'absolute',
         justifyContent:'center',
         color:'white',
         marginTop:hp('40%'),
-        borderWidth:7,
-        borderColor:'transparent',
-        marginLeft:wp('20%'),
-        width:wp('60%')
+        marginLeft:wp('35%'),
         
-    },
-    mainContainer:{
-        justifyContent: "center",
-        marginTop:Platform.OS === 'ios' ? 0 : hp('3.5%'),
-        // backgroundColor: 'rgba(0,0,0,0.3)',
-        height:Platform.OS === 'ios' ? hp('80%') : hp('77%'),
-       
     },
   image: {
    
     resizeMode: "cover",
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        bottom: 0,
-        right: 0,
-       
-   
+    justifyContent: "center",
+    marginTop:Platform.OS === 'ios' ? 0 : hp('3%'),
+    // backgroundColor: 'rgba(0,0,0,0.3)',
+    height:Platform.OS === 'ios' ? hp('80%') : hp('77%'),
   },
   volumeIcon: {
     width: 25,
@@ -421,8 +446,7 @@ const styles = StyleSheet.create({
     height: 50,
     // marginRight: 10,
   },
-
- powerIcon: {
+  powerIcon: {
     width: 25,
     height: 25,
     // marginLeft: 10,
@@ -433,6 +457,7 @@ const styles = StyleSheet.create({
     height: 50,
     // marginRight: 10,
   },
+
   play_pauseIcon: {
     width: 70,
     height: 70,
@@ -446,12 +471,15 @@ const styles = StyleSheet.create({
     
     marginRight: 25,
   },
+
   logoIcon:{
     width:70,
     height:70,
-    marginTop:Platform.OS === 'ios' ? 0 : hp('3.5%'),
 
   },
+  
+  
+
   imageContainer:{
     justifyContent: 'center',
     alignItems: 'center',
@@ -460,8 +488,8 @@ const styles = StyleSheet.create({
   header:{
       color:'white',
       fontSize:20,
+    
       justifyContent:'center',
       marginTop:10
-  },
-   
+  }
 });

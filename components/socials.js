@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity,Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity,Dimensions, Platform } from 'react-native';
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { Linking } from 'expo';
 
@@ -35,19 +35,28 @@ export default class Socials extends Component {
         Linking.openURL('https://www.instagram.com/worldbeatradio/?hl=en');
       };
 
-      _handlePressPower = () => {
-        console.log("Welcome!!")
+      _handlePressWhatsapp = () => {
+          Linking.openURL("https://wa.me/2348142925299?text=Hey,%0D%0AI%20love%20your%20radio%0D%0AI'd%20like%20to%20place%20a%20song%20request")
+      }
+
+
+      _handlePressAfrica = () => {
+        Linking.openURL('http://www.africa-online.com/');
     } 
 
       render(){
 
         return (
             <View style={styles.container}>
-    
-       
+                
+                <TouchableOpacity onPress={this._handlePressAfrica}>
+                    <Image style={styles.tinyLogo} source={require('../assets/Africa.png')}/>
+                </TouchableOpacity>
+
                 <TouchableOpacity  onPress={this._handlePressFacebook}>
                     <Image style={styles.tinyLogo} source={require('../assets/facebook.png')}/>
                 </TouchableOpacity>
+
                     
                 <TouchableOpacity  onPress={this._handlePressTwitter}>
                     <Image style={styles.tinyLogo} source={require('../assets/twitter.png')}/>
@@ -60,18 +69,16 @@ export default class Socials extends Component {
                 <TouchableOpacity onPress={this._handlePressInstagram}>
                     <Image style={styles.tinyLogo} source={require('../assets/instagram.png')}/>
                 </TouchableOpacity>
+                <TouchableOpacity onPress={this._handlePressWhatsapp}>
+                    <Image style={styles.tinyLogo} source={require('../assets/whatsapp.png')}/>
+                </TouchableOpacity>
 
-                <Text style={styles.footer}>Share</Text>
+                <Text style={styles.footer}>All The Best in African Music & Beyond</Text>
     
-            </View>
-    
-    
+            </View>    
+        )
 
-      
-    
-    )
-
-        }
+    }
 
 }
 
@@ -84,8 +91,9 @@ const styles = StyleSheet.create({
     flexDirection:'row', 
     alignContent:'center', 
     backgroundColor:'black', 
-    marginTop:hp('80%'),
-    height:hp('17%'), 
+    marginTop: Platform.OS === 'ios' ? hp('78%') : hp('80%'),
+    marginBottom:0,
+    height:hp('20%'), 
     width:wp('100%'),
   },
   tinyLogo: {
