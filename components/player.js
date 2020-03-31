@@ -111,9 +111,7 @@ export default class Player extends Component{
                         setIcon:require("../assets/play.png"),
                       });
                     } else {
-                      console.log('playing...');
                       await this.sound.playAsync();
-                      console.log('playing!');
                       this.setState({
                         playingStatus: 'playing',
                         setIcon:require("../assets/pause.png"),
@@ -129,7 +127,6 @@ export default class Player extends Component{
 
 
                     if (this.state.playingStatus == 'playing') {
-                      console.log('pausing...');
                       await this.sound.pauseAsync();
                       ToastAndroid.show('Radio Paused', ToastAndroid.SHORT); 
                       this.setState({
@@ -137,7 +134,6 @@ export default class Player extends Component{
                         setIcon:require("../assets/play.png"),
                       });
                     } else {
-                      console.log('playing...');
                       await this.sound.playAsync();
                       this.setState({
                         playingStatus: 'playing',
